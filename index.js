@@ -26,7 +26,7 @@ const distube = new DisTube(client, {
 const PREFIX = '!';
 
 client.on('ready', () => {
-    console.log(`تم تشغيل البوت: ${client.user.tag}`);
+    console.log(`✅ تم تشغيل البوت بنجاح: ${client.user.tag}`);
     
     // إظهار حالة أونلاين باللون الأخضر مع النشاط
     client.user.setPresence({
@@ -80,4 +80,11 @@ distube.on('playSong', (queue, song) => {
     queue.textChannel.send(`🎶 شغال الحين: **${song.name}** - \`${song.formattedDuration}\``);
 });
 
-client.login(process.env.TOKEN);
+// التعامل مع أخطاء تسجيل الدخول والتوكن
+if (!process.env.TOKEN) {
+    console.error("❌ خطأ: المتغير TOKEN غير معرف في Environment Variables في Render!");
+} else {
+    client.login(process.env.TOKEN).catch(err => {
+        console.error("❌ فشل تسجيل الدخول إلى Discord:", err.message);
+    });
+}
