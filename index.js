@@ -15,7 +15,14 @@ const client = new Client({
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
-    ]
+    ],
+    presence: {
+        status: 'online',
+        activities: [{
+            name: '!p | الموسيقى 🎵',
+            type: ActivityType.Listening
+        }]
+    }
 });
 
 const distube = new DisTube(client, {
