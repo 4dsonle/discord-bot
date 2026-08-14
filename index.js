@@ -15,14 +15,7 @@ const client = new Client({
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent
-    ],
-    presence: {
-        status: 'online',
-        activities: [{
-            name: '!p | الموسيقى 🎵',
-            type: ActivityType.Listening
-        }]
-    }
+    ]
 });
 
 const distube = new DisTube(client, {
@@ -35,7 +28,7 @@ const PREFIX = '!';
 client.on('ready', () => {
     console.log(`تم تشغيل البوت: ${client.user.tag}`);
     
-    // إجبار البوت على إظهار حالة Online والدائرة الخضراء
+    // إظهار حالة أونلاين باللون الأخضر مع النشاط
     client.user.setPresence({
         status: 'online',
         activities: [{
