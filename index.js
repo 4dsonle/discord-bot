@@ -2,7 +2,7 @@ const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { DisTube } = require('distube');
 const http = require('http');
 
-// سيرفر بسيط لحفظ البوت شغال بدون توقف
+// سيرفر إبقاء الخدمة تعمل 24/7
 http.createServer((req, res) => {
     res.write("Bot is online 24/7");
     res.end();
@@ -17,22 +17,18 @@ const client = new Client({
     ]
 });
 
-// تهيئة DisTube بدون البلاجنز التي تسبب تعليق السكربت
 const distube = new DisTube(client, {
-    emitNewSongOnly: true
+    emitNewSongOnly: true,
+    nsfw: true
 });
 
 const PREFIX = '!';
 
 client.on('ready', () => {
-    console.log(`✅ تم تشغيل البوت بنجاح: ${client.user.tag}`);
-    
+    console.log(`✅ جاهز للعمل: ${client.user.tag}`);
     client.user.setPresence({
         status: 'online',
-        activities: [{
-            name: '!p | الموسيقى 🎵',
-            type: ActivityType.Listening
-        }]
+        activities: [{ name: '!p | Music 🎵', type: ActivityType.Listening }]
     });
 });
 
@@ -44,10 +40,13 @@ client.on('messageCreate', async (message) => {
 
     if (command === 'play' || command === 'p') {
         const voiceChannel = message.member.voice.channel;
-        if (!voiceChannel) return message.reply('ادخل روم صوتي أولاً!');
+        if (!voiceChannel) return message.reply('❌ ادخل روم صوتي أولاً!');
 
         const query = args.join(' ');
-        if (!query) return message.reply('اكتب اسم الأغنية أو الرابط!');
+        if (!query) return message.reply('❌ اكتب اسم الأغنية أو الرابط!');
+
+        console.log(`🎵 طلب تشغيل: ${query} بواسطة ${message.author.tag}`);
+        message.reply('⏳ جاري التحميل والتشغيل...');
 
         try {
             await distube.play(voiceChannel, query, {
@@ -55,8 +54,8 @@ client.on('messageCreate', async (message) => {
                 member: message.member
             });
         } catch (err) {
-            console.error(err);
-            message.reply('حدث خطأ أثناء محاولة تشغيل المقطع.');
+            console.error("❌ خطأ بالتشغيل:", err);
+            message.channel.send(`❌ حدث خطأ أثناء التشغيل: ${err.message || err}`);
         }
     }
 
@@ -83,7 +82,11 @@ distube.on('playSong', (queue, song) => {
     queue.textChannel.send(`🎶 شغال الحين: **${song.name}** - \`${song.formattedDuration}\``);
 });
 
-// تسجيل الدخول مع معالجة الأخطاء
+distube.on('error', (channel, e) => {
+    console.error("❌ DisTube Error:", e);
+    if (channel) channel.send(`❌ خطأ من DisTube: ${e.message}`);
+});
+
 client.login(process.env.TOKEN).catch(err => {
-    console.error("❌ خطأ صريح في تسجيل الدخول:", err);
+    console.error("❌ خطأ التوكن:", err.message);
 });
