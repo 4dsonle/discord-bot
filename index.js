@@ -1,8 +1,8 @@
 const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { DisTube } = require('distube');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
 const http = require('http');
 
+// سيرفر بسيط لحفظ البوت شغال بدون توقف
 http.createServer((req, res) => {
     res.write("Bot is online 24/7");
     res.end();
@@ -17,18 +17,22 @@ const client = new Client({
     ]
 });
 
+// تهيئة DisTube بدون البلاجنز التي تسبب تعليق السكربت
 const distube = new DisTube(client, {
-    emitNewSongOnly: true,
-    plugins: [new YtDlpPlugin()]
+    emitNewSongOnly: true
 });
 
 const PREFIX = '!';
 
 client.on('ready', () => {
     console.log(`✅ تم تشغيل البوت بنجاح: ${client.user.tag}`);
+    
     client.user.setPresence({
         status: 'online',
-        activities: [{ name: '!p | الموسيقى 🎵', type: ActivityType.Listening }]
+        activities: [{
+            name: '!p | الموسيقى 🎵',
+            type: ActivityType.Listening
+        }]
     });
 });
 
@@ -45,10 +49,15 @@ client.on('messageCreate', async (message) => {
         const query = args.join(' ');
         if (!query) return message.reply('اكتب اسم الأغنية أو الرابط!');
 
-        distube.play(voiceChannel, query, {
-            textChannel: message.channel,
-            member: message.member
-        });
+        try {
+            await distube.play(voiceChannel, query, {
+                textChannel: message.channel,
+                member: message.member
+            });
+        } catch (err) {
+            console.error(err);
+            message.reply('حدث خطأ أثناء محاولة تشغيل المقطع.');
+        }
     }
 
     if (command === 'stop' || command === 'leave') {
@@ -74,11 +83,7 @@ distube.on('playSong', (queue, song) => {
     queue.textChannel.send(`🎶 شغال الحين: **${song.name}** - \`${song.formattedDuration}\``);
 });
 
-// فحص وجود التوكن وطباعة الخطأ إن وجد
-if (!process.env.TOKEN) {
-    console.error("❌ خطأ: المتغير TOKEN غير موجود في Environment!");
-} else {
-    client.login(process.env.TOKEN).catch(err => {
-        console.error("❌ خطأ تسجيل الدخول:", err.message);
-    });
-}
+// تسجيل الدخول مع معالجة الأخطاء
+client.login(process.env.TOKEN).catch(err => {
+    console.error("❌ خطأ صريح في تسجيل الدخول:", err);
+});
