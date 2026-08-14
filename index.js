@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActivityType } = require('discord.js');
 const { DisTube } = require('distube');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
 const http = require('http');
@@ -27,6 +27,15 @@ const PREFIX = '!';
 
 client.on('ready', () => {
     console.log(`تم تشغيل البوت: ${client.user.tag}`);
+    
+    // إجبار البوت على إظهار حالة Online والدائرة الخضراء
+    client.user.setPresence({
+        status: 'online',
+        activities: [{
+            name: '!p | الموسيقى 🎵',
+            type: ActivityType.Listening
+        }]
+    });
 });
 
 client.on('messageCreate', async (message) => {
