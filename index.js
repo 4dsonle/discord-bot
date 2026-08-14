@@ -3,7 +3,6 @@ const { DisTube } = require('distube');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
 const http = require('http');
 
-// سيرفر بسيط لحفظ البوت شغال بدون توقف
 http.createServer((req, res) => {
     res.write("Bot is online 24/7");
     res.end();
@@ -27,14 +26,9 @@ const PREFIX = '!';
 
 client.on('ready', () => {
     console.log(`✅ تم تشغيل البوت بنجاح: ${client.user.tag}`);
-    
-    // إظهار حالة أونلاين باللون الأخضر مع النشاط
     client.user.setPresence({
         status: 'online',
-        activities: [{
-            name: '!p | الموسيقى 🎵',
-            type: ActivityType.Listening
-        }]
+        activities: [{ name: '!p | الموسيقى 🎵', type: ActivityType.Listening }]
     });
 });
 
@@ -80,11 +74,11 @@ distube.on('playSong', (queue, song) => {
     queue.textChannel.send(`🎶 شغال الحين: **${song.name}** - \`${song.formattedDuration}\``);
 });
 
-// التعامل مع أخطاء تسجيل الدخول والتوكن
+// فحص وجود التوكن وطباعة الخطأ إن وجد
 if (!process.env.TOKEN) {
-    console.error("❌ خطأ: المتغير TOKEN غير معرف في Environment Variables في Render!");
+    console.error("❌ خطأ: المتغير TOKEN غير موجود في Environment!");
 } else {
     client.login(process.env.TOKEN).catch(err => {
-        console.error("❌ فشل تسجيل الدخول إلى Discord:", err.message);
+        console.error("❌ خطأ تسجيل الدخول:", err.message);
     });
 }
